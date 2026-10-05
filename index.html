@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recuento La Pava</title>
+<meta name="description" content="Recuento de botellas y cajas del bar La Pava con PDF del día.">
+<meta name="theme-color" content="#1E6A4C">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Recuento">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script src="vendor/jspdf.umd.min.js"></script>
+<style>
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/Barlow-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/Barlow-500.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/Barlow-600.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/BarlowCondensed-600.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/BarlowCondensed-700.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+html{-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+:root{
+  --bg:#EEF1EC; --surface:#FFFFFF; --surface-2:#F6F8F4; --line:#D9DFD6;
+  --ink:#18221D; --muted:#5B6961; --accent:#1E6A4C; --accent-ink:#FFFFFF; --accent-soft:#DCEBE2;
+  --amber:#B8650F; --amber-soft:#FBEBD6; --danger:#B3261E; --danger-soft:#F9DEDB;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F1512; --surface:#18201C; --surface-2:#1F2924; --line:#2C3832;
+    --ink:#E6ECE8; --muted:#97A69D; --accent:#4DB887; --accent-ink:#0C1A13; --accent-soft:#1D3A2C;
+    --amber:#F0A548; --amber-soft:#3A2A14; --danger:#F08A80; --danger-soft:#3D1D1A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1512; --surface:#18201C; --surface-2:#1F2924; --line:#2C3832;
+  --ink:#E6ECE8; --muted:#97A69D; --accent:#4DB887; --accent-ink:#0C1A13; --accent-soft:#1D3A2C;
+  --amber:#F0A548; --amber-soft:#3A2A14; --danger:#F08A80; --danger-soft:#3D1D1A;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:0 96px}
+
+/* Cabecera */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding-block:12px 8px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+#topExtra{display:grid;gap:10px;min-width:0}
+#topExtra:empty{display:none}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.brand h1{margin:0;font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.01em;line-height:1}
+.brand h1 span{color:var(--accent)}
+.status{font-size:13px;color:var(--muted);white-space:nowrap}
+.status.warn{color:var(--amber)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.tabs button{border:0;background:none;padding:8px 2px;border-radius:7px;font-weight:600;font-size:15px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:380px){.tabs button{font-size:14px}}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+
+/* Barra de recuento */
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.date{flex:1 1 160px;display:flex;flex-direction:column;gap:2px}
+.date label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.date input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px;min-height:40px;width:100%}
+.progress{flex:1 1 140px;display:grid;gap:4px}
+.progress .txt{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.progress .txt b{color:var(--ink);font-weight:600}
+.meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent);transition:width .2s}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:9px 14px;font-weight:600;min-height:42px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:none}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.btn.small{min-height:34px;padding:5px 10px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:14px;font-weight:500;white-space:nowrap}
+.chip .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-left:4px;font-size:12px}
+.chip.done{border-color:var(--accent);color:var(--accent)}
+.chip.on{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+
+.notice{border:1px solid var(--amber);background:var(--amber-soft);color:var(--ink);border-radius:10px;padding:12px;display:grid;gap:10px;margin-top:12px}
+.notice .row{display:flex;gap:8px;flex-wrap:wrap}
+.notice.err{border-color:var(--danger);background:var(--danger-soft)}
+
+/* Secciones y filas */
+.sec{margin-top:18px;scroll-margin-top:200px}
+.sec h2{margin:0 0 6px;font-family:var(--display);font-weight:600;font-size:22px;display:flex;align-items:baseline;gap:8px}
+.sec h2 small{font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted)}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.item{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 14px;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item .name{flex:1;min-width:0}
+.item .name b{display:block;font-weight:500;overflow-wrap:anywhere}
+.item .name small{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.item.pending{box-shadow:inset 3px 0 0 var(--amber)}
+.stepper{display:flex;align-items:center;gap:4px;flex:none}
+.stepper button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);font-size:24px;line-height:1;font-weight:500;display:grid;place-items:center}
+.stepper button:active{background:var(--accent-soft)}
+.stepper input{width:56px;height:44px;text-align:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-family:var(--display);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;padding:0}
+.stepper input::placeholder{color:var(--muted);opacity:.7}
+.stepper input.zero{color:var(--danger)}
+.notes{margin-top:18px;display:grid;gap:6px}
+.notes label{font-family:var(--display);font-weight:600;font-size:22px}
+.notes textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 12px;resize:vertical}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+
+/* Barra inferior */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.dock .in{max-width:640px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.dock .btn.primary{flex:1;min-height:48px;font-size:17px}
+
+/* Editar productos */
+.ecat{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ecat-head{display:flex;gap:8px;align-items:center;padding:10px;background:var(--surface-2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ecat-head input{flex:1 1 100%;font-family:var(--display);font-size:20px;font-weight:600;border:1px solid transparent;background:none;border-radius:8px;padding:4px 8px;min-width:0}
+.ecat-head input:focus{border-color:var(--line);background:var(--surface)}
+.ecat-head select{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;min-height:36px}
+.erow{display:flex;gap:6px;align-items:center;padding:6px 8px 6px 10px;border-top:1px solid var(--line)}
+.erow:first-of-type{border-top:0}
+.erow input{flex:1;min-width:0;border:1px solid transparent;background:none;border-radius:8px;padding:7px 8px}
+.erow input:focus{border-color:var(--line);background:var(--surface-2)}
+.ib{width:36px;height:36px;flex:none;border-radius:8px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:16px;color:var(--muted)}
+.ib.del{color:var(--danger)}
+.ib:disabled{opacity:.35;cursor:default}
+.confirm{background:var(--danger);color:#fff;border:0;border-radius:8px;padding:0 10px;height:36px;font-weight:600;font-size:14px;flex:none}
+.eadd{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line)}
+.eadd input{flex:1;min-width:0;border:1px dashed var(--line);border-radius:8px;padding:8px 10px;background:var(--surface-2)}
+.newcat{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+.newcat input{flex:1 1 180px;border:1px solid var(--line);border-radius:9px;padding:9px 12px;background:var(--surface);min-height:42px}
+.hint{font-size:14px;color:var(--muted);margin:14px 0 0}
+.reset{margin-top:22px;display:flex;gap:8px;flex-wrap:wrap}
+.reset .confirm{height:auto;padding:8px 12px}
+
+/* Historial */
+.hist{margin-top:14px;display:grid;gap:10px}
+.hrow{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hrow .d{flex:1 1 180px}
+.hrow .d b{font-family:var(--display);font-size:20px;font-weight:600;display:block;text-transform:capitalize}
+.hrow .d small{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.hrow .acts{display:flex;gap:6px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:9px;font-size:14px;z-index:50;max-width:calc(100% - 32px)}
+/* Calculadora (caja del día) */
+.kpi{flex:1 1 140px;display:grid;gap:2px;text-align:right}
+.kpi span{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.kpi b{font-family:var(--display);font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.neg{color:var(--danger)!important}
+.crow{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 14px;border-top:1px solid var(--line)}
+.crow:first-child{border-top:0}
+.crow>label,.crow>span{flex:1;min-width:0;font-weight:500}
+.crow small,.ctot small,.res small{display:block;font-family:var(--body);font-size:12px;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.crow.auto b{font-family:var(--display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;padding-right:4px}
+.money{position:relative;flex:none;width:118px}
+.money input{width:100%;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-family:var(--display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right;padding:0 26px 0 8px}
+.money input::placeholder{color:var(--muted);opacity:.7}
+.money span{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+.ctot{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:2px solid var(--accent);background:var(--accent-soft)}
+.ctot span{flex:1;font-family:var(--display);font-weight:600;font-size:21px}
+.ctot b{font-family:var(--display);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.gi{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:8px 10px 8px 14px;border-top:1px solid var(--line)}
+.gi:first-child{border-top:0}
+.gl{display:flex;gap:8px;align-items:center;min-width:0}
+.gl .txt{flex:1 1 0;width:0;min-width:0;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);padding:0 10px;font-weight:500}
+.gl2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.gl2 select,.gl2 input{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px 8px;min-height:36px;font-variant-numeric:tabular-nums}
+.gl2 input[type="time"]{width:116px;min-width:0}
+.hrs{margin-left:auto;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;padding-right:4px}
+.addrow{display:block;width:100%;border:0;border-top:1px solid var(--line);background:none;padding:12px 14px;text-align:left;color:var(--accent);font-weight:600}
+.devolver{font-size:14px;color:var(--muted);margin:8px 2px 0}
+.devolver b{color:var(--ink);font-weight:600}
+.res{margin-top:22px;background:var(--surface);border:2px solid var(--accent);border-radius:12px;overflow:hidden}
+.res .r{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.res .r+.r{border-top:1px solid var(--line)}
+.res .r span{flex:1;min-width:0;font-family:var(--display);font-weight:600;font-size:22px}
+.res .r b{font-family:var(--display);font-weight:700;font-size:30px;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top" id="top">
+    <div class="brand">
+      <h1>La Pava <span>· Recuento</span></h1>
+      <span class="status" id="status">Cargando…</span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-view="contar" aria-selected="true">Contar</button>
+      <button role="tab" data-view="caja" aria-selected="false">Calculadora</button>
+      <button role="tab" data-view="productos" aria-selected="false">Productos</button>
+      <button role="tab" data-view="historial" aria-selected="false">Historial</button>
+    </nav>
+    <div id="topExtra"></div>
+  </header>
+  <main id="main"></main>
+</div>
+<div class="dock" id="dock" hidden>
+  <div class="in">
+    <button class="btn" id="btnPend" type="button">Sin contar</button>
+    <button class="btn primary" id="btnPdf" type="button">Guardar PDF</button>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const pad = n => String(n).padStart(2, "0");
+function hoyISO(){ const d = new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function fechaLarga(iso){
+  const [y,m,d] = iso.split("-").map(Number);
+  return new Date(y, m-1, d).toLocaleDateString("es-ES", {weekday:"long", day:"numeric", month:"long", year:"numeric"});
+}
+function fechaCorta(iso){ const [y,m,d] = iso.split("-"); return d+"/"+m+"/"+y; }
+function num(v){ // 2.5 -> "2,5"
+  if (v === undefined || v === null || v === "") return "";
+  return String(Math.round(v*100)/100).replace(".", ",");
+}
+function parseNum(s){
+  s = String(s).trim().replace(",", ".");
+  if (s === "") return null;
+  const v = Number(s);
+  return Number.isFinite(v) && v >= 0 ? Math.round(v*100)/100 : NaN;
+}
+const UNIDADES = ["botellas","cajas","unidades","barriles"];
+const local = {
+  get(k){ try { const v = localStorage.getItem("pava:"+k); return v ? JSON.parse(v) : null; } catch { return null; } },
+  set(k,v){ try { localStorage.setItem("pava:"+k, JSON.stringify(v)); return true; } catch { return false; } },
+  del(k){ try { localStorage.removeItem("pava:"+k); } catch {} }
+};
+let toastT;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+
+/* ---------- estado ---------- */
+const S = {
+  ready: false, offline: false,
+  catalogo: { categorias: [] },
+  fecha: hoyISO(),
+  rec: { valores: {}, notas: "" },
+  historial: [],          // [{fecha, valores, notas, catalogo}]
+  caja: null,             // caja del día que se está editando
+  cajas: [],              // cajas guardadas, de más nueva a más vieja
+  view: "contar",
+  soloPend: false,
+  aviso: false,           // aviso antes del PDF
+  borrar: null,           // id pendiente de confirmar borrado
+  saveState: "ok"         // ok | error
+};
+
+/* ---------- guardado (solo en este móvil) ---------- */
+const MAX_HIST = 120;
+function setStatus(){
+  const el = $("#status");
+  el.classList.toggle("warn", S.saveState === "error");
+  if (!S.ready) el.textContent = "Cargando…";
+  else if (S.saveState === "error") el.textContent = "¡No se pudo guardar!";
+  else el.textContent = "Guardado en el móvil";
+}
+function snapshotCatalogo(){ return JSON.parse(JSON.stringify(S.catalogo)); }
+function guardarRecuento(){
+  const doc = { fecha: S.fecha, valores: S.rec.valores, notas: S.rec.notas, catalogo: snapshotCatalogo(), actualizado: new Date().toISOString() };
+  const i = S.historial.findIndex(h => h.fecha === S.fecha);
+  if (i >= 0) S.historial[i] = doc; else { S.historial.push(doc); S.historial.sort((a,b) => b.fecha.localeCompare(a.fecha)); }
+  S.saveState = local.set("rec:"+S.fecha, doc) ? "ok" : "error";
+  // no guardar recuentos antiguos sin límite
+  while (S.historial.length > MAX_HIST) { const viejo = S.historial.pop(); local.del("rec:"+viejo.fecha); }
+  setStatus();
+}
+function guardarCatalogo(){
+  S.saveState = local.set("catalogo", S.catalogo) ? "ok" : "error";
+  setStatus();
+}
+
+/* ---------- datos derivados ---------- */
+function todosProductos(cat = S.catalogo){ return cat.categorias.flatMap(c => c.productos); }
+function anterior(){ return S.historial.find(h => h.fecha < S.fecha) || null; }
+function contados(){ const v = S.rec.valores; return todosProductos().filter(p => v[p.id] !== undefined).length; }
+
+function cargarFecha(f){
+  S.fecha = f; S.aviso = false;
+  const h = S.historial.find(x => x.fecha === f);
+  S.rec = h ? { valores: { ...(h.valores||{}) }, notas: h.notas || "" } : { valores: {}, notas: "" };
+}
+
+/* ---------- render ---------- */
+function render(){
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === S.view)));
+  $("#dock").hidden = !((S.view === "contar" || S.view === "caja") && S.ready);
+  $("#btnPend").hidden = S.view !== "contar";
+  setStatus();
+  if (!S.ready) { $("#topExtra").innerHTML = ""; $("#main").innerHTML = '<p class="empty">Cargando productos…</p>'; return; }
+  if (S.view === "contar") renderContar();
+  else if (S.view === "caja") renderCaja();
+  else if (S.view === "productos") renderProductos();
+  else renderHistorial();
+}
+
+function renderContar(){
+  const total = todosProductos().length, hechos = contados(), faltan = total - hechos;
+  const pct = total ? Math.round(hechos/total*100) : 0;
+  const v = S.rec.valores, ant = anterior();
+  $("#topExtra").innerHTML = `
+    <div class="bar">
+      <div class="date"><label for="fecha">Fecha del recuento</label><input type="date" id="fecha" value="${S.fecha}"></div>
+      <div class="progress"><span class="txt"><b>${hechos}</b> de ${total} contados</span><div class="meter"><i style="width:${pct}%"></i></div></div>
+    </div>
+    <div class="chips" id="chips">${S.catalogo.categorias.map(c => {
+      const n = c.productos.filter(p => v[p.id] === undefined).length;
+      return `<button class="chip ${n===0 && c.productos.length ? "done":""}" data-go="${c.id}" type="button">${esc(c.nombre)}${n ? `<span class="n">${n}</span>` : " ✓"}</button>`;
+    }).join("")}</div>`;
+  $("#fecha").addEventListener("change", e => { if (e.target.value) { cargarFecha(e.target.value); render(); window.scrollTo(0,0); } });
+  $("#chips").addEventListener("click", e => {
+    const b = e.target.closest("[data-go]"); if (!b) return;
+    const s = document.getElementById("sec-"+b.dataset.go); if (s) s.scrollIntoView({behavior:"smooth", block:"start"});
+  });
+
+  const btnPend = $("#btnPend");
+  btnPend.textContent = S.soloPend ? "Ver todo" : `Sin contar (${faltan})`;
+  btnPend.disabled = !S.soloPend && faltan === 0;
+
+  if (!S.catalogo.categorias.length) {
+    $("#main").innerHTML = S.offline
+      ? `<div class="notice err">No se han podido cargar los productos guardados. Cierra la página y vuelve a abrirla con conexión a internet.</div>`
+      : `<p class="empty">No hay productos todavía.<br>Añádelos en la pestaña <b>Productos</b>.</p>`;
+    return;
+  }
+  let html = "";
+  if (S.aviso) {
+    html += `<div class="notice" role="alert"><div>Faltan <b>${faltan}</b> producto${faltan===1?"":"s"} por contar. En el PDF saldrán vacíos.</div>
+      <div class="row"><button class="btn small" data-act="verpend" type="button">Ver cuáles</button><button class="btn small primary" data-act="pdfya" type="button">Descargar igualmente</button><button class="btn small ghost" data-act="cerraraviso" type="button">Cancelar</button></div></div>`;
+  }
+  if (S.offline) html += `<div class="notice err">No se ha podido conectar con el almacenamiento. Lo que cuentes se guarda solo en este dispositivo.</div>`;
+  if (S.soloPend && faltan === 0) html += `<p class="empty">Todo contado. Ya puedes descargar el PDF.</p>`;
+
+  for (const c of S.catalogo.categorias) {
+    const prods = S.soloPend ? c.productos.filter(p => v[p.id] === undefined) : c.productos;
+    if (!prods.length) continue;
+    html += `<section class="sec" id="sec-${c.id}"><h2>${esc(c.nombre)} <small>${esc(c.unidad)}</small></h2><div class="list">`;
+    for (const p of prods) {
+      const val = v[p.id], pend = val === undefined;
+      const a = ant && ant.valores && ant.valores[p.id] !== undefined ? `Anterior: ${num(ant.valores[p.id])}` : "";
+      html += `<div class="item ${pend ? "pending":""}" data-id="${p.id}">
+        <div class="name"><b>${esc(p.nombre)}</b>${a ? `<small>${a}</small>` : ""}</div>
+        <div class="stepper">
+          <button type="button" data-step="-1" aria-label="Quitar media a ${esc(p.nombre)}">−</button>
+          <input id="v-${p.id}" inputmode="decimal" autocomplete="off" placeholder="–" value="${num(val)}" class="${val === 0 ? "zero":""}" aria-label="Cantidad de ${esc(p.nombre)}">
+          <button type="button" data-step="1" aria-label="Añadir media a ${esc(p.nombre)}">+</button>
+        </div></div>`;
+    }
+    html += `</div></section>`;
+  }
+  if (!S.soloPend) html += `<div class="notes"><label for="notas">Notas para el jefe</label><textarea id="notas" placeholder="Ej.: Nestea, no pedir. Falta hielo.">${esc(S.rec.notas)}</textarea></div>`;
+  $("#main").innerHTML = html;
+}
+
+function actualizarFila(id){
+  const val = S.rec.valores[id];
+  const inp = document.getElementById("v-"+id);
+  if (inp) { inp.value = num(val); inp.classList.toggle("zero", val === 0); inp.closest(".item").classList.toggle("pending", val === undefined); }
+  // refrescar cabecera sin perder foco
+  const total = todosProductos().length, hechos = contados();
+  const t = document.querySelector(".progress .txt"); if (t) t.innerHTML = `<b>${hechos}</b> de ${total} contados`;
+  const m = document.querySelector(".meter i"); if (m) m.style.width = (total ? Math.round(hechos/total*100) : 0) + "%";
+  const v = S.rec.valores;
+  S.catalogo.categorias.forEach(c => {
+    const b = document.querySelector(`[data-go="${c.id}"]`); if (!b) return;
+    const n = c.productos.filter(p => v[p.id] === undefined).length;
+    b.classList.toggle("done", n === 0 && c.productos.length > 0);
+    b.innerHTML = esc(c.nombre) + (n ? `<span class="n">${n}</span>` : " ✓");
+  });
+  if (!S.soloPend) { const bp = $("#btnPend"); bp.textContent = `Sin contar (${total-hechos})`; bp.disabled = total-hechos === 0; }
+}
+
+function renderProductos(){
+  $("#topExtra").innerHTML = "";
+  const cats = S.catalogo.categorias;
+  let html = `<p class="hint">Los cambios se guardan solos en este móvil. Si borras un producto, los recuentos anteriores lo conservan.</p>`;
+  cats.forEach((c, ci) => {
+    const delCat = S.borrar === "c:"+c.id;
+    html += `<section class="ecat" data-cat="${c.id}">
+      <div class="ecat-head">
+        <input id="cn-${c.id}" value="${esc(c.nombre)}" data-edit="cat" aria-label="Nombre de la categoría">
+        <select id="cu-${c.id}" data-edit="unidad" aria-label="Unidad">${UNIDADES.concat(UNIDADES.includes(c.unidad) ? [] : [c.unidad]).map(u => `<option ${u===c.unidad?"selected":""}>${esc(u)}</option>`).join("")}</select>
+        <button class="ib" data-act="cup" ${ci===0?"disabled":""} type="button" aria-label="Subir categoría">↑</button>
+        <button class="ib" data-act="cdown" ${ci===cats.length-1?"disabled":""} type="button" aria-label="Bajar categoría">↓</button>
+        ${delCat ? `<button class="confirm" data-act="cdelok" type="button">¿Borrar ${c.productos.length ? "con "+c.productos.length+" productos" : ""}?</button>` : `<button class="ib del" data-act="cdel" type="button" aria-label="Borrar categoría">✕</button>`}
+      </div>`;
+    c.productos.forEach((p, pi) => {
+      const del = S.borrar === "p:"+p.id;
+      html += `<div class="erow" data-id="${p.id}">
+        <input id="pn-${p.id}" value="${esc(p.nombre)}" data-edit="prod" aria-label="Nombre del producto">
+        <button class="ib" data-act="up" ${pi===0?"disabled":""} type="button" aria-label="Subir">↑</button>
+        <button class="ib" data-act="down" ${pi===c.productos.length-1?"disabled":""} type="button" aria-label="Bajar">↓</button>
+        ${del ? `<button class="confirm" data-act="delok" type="button">¿Borrar?</button>` : `<button class="ib del" data-act="del" type="button" aria-label="Borrar ${esc(p.nombre)}">✕</button>`}
+      </div>`;
+    });
+    html += `<form class="eadd" data-add="${c.id}"><input id="add-${c.id}" placeholder="Nuevo producto en ${esc(c.nombre)}" autocomplete="off"><button class="btn small primary" type="submit">Añadir</button></form></section>`;
+  });
+  html += `<div class="reset">${S.borrar === "reset"
+    ? `<button class="confirm" data-act="resetok" type="button">Sí, volver a la lista del Excel</button><button class="btn small ghost" data-act="resetno" type="button">Cancelar</button>`
+    : `<button class="btn small ghost" data-act="reset" type="button">Volver a la lista original del Excel</button>`}</div>`;
+  html += `<form class="newcat" id="newcat"><input id="newcatname" placeholder="Nueva categoría (ej.: Cervezas)" autocomplete="off"><button class="btn" type="submit">Crear categoría</button></form>`;
+  $("#main").innerHTML = html;
+}
+
+function renderHistorial(){
+  $("#topExtra").innerHTML = "";
+  if (!S.historial.length && !S.cajas.length) { $("#main").innerHTML = `<p class="empty">Todavía no hay recuentos ni cajas guardados.</p>`; return; }
+  let html = "";
+  if (S.historial.length) html += `<section class="sec"><h2>Recuentos</h2><div class="hist">${S.historial.map(h => {
+    const prods = todosProductos(h.catalogo || S.catalogo);
+    const n = prods.filter(p => h.valores && h.valores[p.id] !== undefined).length;
+    return `<div class="hrow"><div class="d"><b>${fechaLarga(h.fecha)}</b><small>${n} de ${prods.length} contados${h.fecha === hoyISO() ? " · hoy" : ""}</small></div>
+      <div class="acts"><button class="btn small" data-open="${h.fecha}" type="button">Abrir</button><button class="btn small primary" data-pdf="${h.fecha}" type="button">PDF</button></div></div>`;
+  }).join("")}</div></section>`;
+  if (S.cajas.length) html += `<section class="sec"><h2>Caja</h2><div class="hist">${S.cajas.map(c => {
+    return `<div class="hrow"><div class="d"><b>${fechaLarga(c.fecha)}</b><small>Neto ${euros(calcCaja(c).neto)}${c.fecha === hoyISO() ? " · hoy" : ""}</small></div>
+      <div class="acts"><button class="btn small" data-copen="${c.fecha}" type="button">Abrir</button><button class="btn small primary" data-cpdf="${c.fecha}" type="button">PDF</button></div></div>`;
+  }).join("")}</div></section>`;
+  $("#main").innerHTML = html;
+}
+
+/* ---------- eventos: contar ---------- */
+$("#main").addEventListener("click", e => {
+  const step = e.target.closest("[data-step]");
+  if (step) {
+    const id = step.closest(".item").dataset.id;
+    const cur = S.rec.valores[id];
+    let nv = (cur ?? 0) + Number(step.dataset.step) * 0.5;
+    if (cur === undefined && step.dataset.step === "-1") nv = 0;
+    S.rec.valores[id] = Math.max(0, nv);
+    actualizarFila(id); guardarRecuento(); return;
+  }
+  const act = e.target.closest("[data-act]");
+  if (act) return accion(act.dataset.act, act);
+  const op = e.target.closest("[data-open]");
+  if (op) { cargarFecha(op.dataset.open); S.view = "contar"; S.soloPend = false; render(); window.scrollTo(0,0); return; }
+  const pd = e.target.closest("[data-pdf]");
+  if (pd) { const h = S.historial.find(x => x.fecha === pd.dataset.pdf); if (h) descargarPDF(h); return; }
+  const co = e.target.closest("[data-copen]");
+  if (co) { cargarCaja(co.dataset.copen); S.view = "caja"; render(); window.scrollTo(0,0); return; }
+  const cp = e.target.closest("[data-cpdf]");
+  if (cp) { const c = S.cajas.find(x => x.fecha === cp.dataset.cpdf); if (c) descargarPDFCaja(c); }
+});
+$("#main").addEventListener("change", e => {
+  const t = e.target;
+  if (t.id && t.id.startsWith("v-")) {
+    const id = t.id.slice(2), v = parseNum(t.value);
+    if (Number.isNaN(v)) { toast("Escribe un número, por ejemplo 2,5"); t.value = num(S.rec.valores[id]); return; }
+    if (v === null) delete S.rec.valores[id]; else S.rec.valores[id] = v;
+    actualizarFila(id); guardarRecuento(); return;
+  }
+  if (t.dataset.edit === "cat") { const c = catDe(t); const nv = t.value.trim(); if (nv) { c.nombre = nv; guardarCatalogo(); } else t.value = c.nombre; return; }
+  if (t.dataset.edit === "unidad") { catDe(t).unidad = t.value; guardarCatalogo(); return; }
+  if (t.dataset.edit === "prod") {
+    const p = prodDe(t).p, nv = t.value.trim();
+    if (nv) { p.nombre = nv; guardarCatalogo(); } else t.value = p.nombre;
+  }
+});
+$("#main").addEventListener("input", e => {
+  if (e.target.id === "notas") { S.rec.notas = e.target.value; guardarRecuento(); }
+});
+$("#main").addEventListener("focusin", e => { if (e.target.id && e.target.id.startsWith("v-")) e.target.select(); });
+$("#main").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id && e.target.id.startsWith("v-")) e.target.blur(); });
+
+/* ---------- eventos: productos ---------- */
+function catDe(el){ const id = el.closest("[data-cat]").dataset.cat; return S.catalogo.categorias.find(c => c.id === id); }
+function prodDe(el){ const c = catDe(el), id = el.closest("[data-id]").dataset.id; const i = c.productos.findIndex(p => p.id === id); return { c, i, p: c.productos[i] }; }
+function mover(arr, i, d){ const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; }
+
+function accion(a, el){
+  if (S.view === "caja") return accionCaja(a, el);
+  const cats = S.catalogo.categorias;
+  switch (a) {
+    case "up": case "down": { const {c,i} = prodDe(el); mover(c.productos, i, a==="up"?-1:1); S.borrar = null; guardarCatalogo(); renderProductos(); break; }
+    case "del": { S.borrar = "p:"+prodDe(el).p.id; renderProductos(); break; }
+    case "delok": { const {c,i,p} = prodDe(el); c.productos.splice(i,1); S.borrar = null; guardarCatalogo(); renderProductos(); toast(`«${p.nombre}» borrado`); break; }
+    case "cup": case "cdown": { const c = catDe(el); mover(cats, cats.indexOf(c), a==="cup"?-1:1); S.borrar = null; guardarCatalogo(); renderProductos(); break; }
+    case "cdel": { S.borrar = "c:"+catDe(el).id; renderProductos(); break; }
+    case "cdelok": { const c = catDe(el); cats.splice(cats.indexOf(c),1); S.borrar = null; guardarCatalogo(); renderProductos(); toast(`Categoría «${c.nombre}» borrada`); break; }
+    case "verpend": S.aviso = false; S.soloPend = true; render(); window.scrollTo(0,0); break;
+    case "pdfya": S.aviso = false; render(); descargarPDF(docActual()); break;
+    case "cerraraviso": S.aviso = false; render(); break;
+    case "reset": S.borrar = "reset"; renderProductos(); break;
+    case "resetno": S.borrar = null; renderProductos(); break;
+    case "resetok": S.catalogo = JSON.parse(JSON.stringify(CATALOGO_INICIAL)); S.borrar = null; guardarCatalogo(); renderProductos(); window.scrollTo(0,0); toast("Lista original restaurada"); break;
+  }
+}
+$("#main").addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target;
+  if (f.dataset.add) {
+    const inp = f.querySelector("input"), nombre = inp.value.trim(); if (!nombre) return;
+    const c = S.catalogo.categorias.find(x => x.id === f.dataset.add);
+    c.productos.push({ id: uid(), nombre });
+    guardarCatalogo(); renderProductos();
+    const again = document.getElementById("add-"+c.id); if (again) again.focus();
+    toast(`«${nombre}» añadido a ${c.nombre}`);
+  } else if (f.id === "newcat") {
+    const nombre = $("#newcatname").value.trim(); if (!nombre) return;
+    const c = { id: uid(), nombre, unidad: "botellas", productos: [] };
+    S.catalogo.categorias.push(c);
+    guardarCatalogo(); renderProductos();
+    const inp = document.getElementById("add-"+c.id); if (inp) { inp.focus(); inp.scrollIntoView({block:"center"}); }
+  }
+});
+// cancelar confirmación de borrado al tocar fuera
+document.addEventListener("click", e => {
+  if (S.borrar && (S.view === "productos" || S.view === "caja") && !e.target.closest("[data-act]")) { S.borrar = null; if (S.view === "caja") renderCaja(); else renderProductos(); }
+}, true);
+
+/* ---------- pestañas y dock ---------- */
+document.querySelector(".tabs").addEventListener("click", e => {
+  const b = e.target.closest("[data-view]"); if (!b) return;
+  S.view = b.dataset.view; S.borrar = null; S.aviso = false; render(); window.scrollTo(0,0);
+});
+$("#btnPend").addEventListener("click", () => { S.soloPend = !S.soloPend; S.aviso = false; render(); window.scrollTo(0,0); });
+$("#btnPdf").addEventListener("click", () => {
+  if (S.view === "caja") { descargarPDFCaja(S.caja); return; }
+  const faltan = todosProductos().length - contados();
+  if (faltan > 0) { S.aviso = true; render(); window.scrollTo(0,0); return; }
+  descargarPDF(docActual());
+});
+function docActual(){ return { fecha: S.fecha, valores: S.rec.valores, notas: S.rec.notas, catalogo: snapshotCatalogo() }; }
+
+/* ---------- PDF ---------- */
+function crearPDF(h){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: "mm", format: "a4" });
+  const W = 210, H = 297, M = 14, GAP = 8, COLW = (W - 2*M - GAP) / 2, ROW = 6.2, HEAD = 8;
+  const verde = [30,106,76], tinta = [24,34,29], gris = [110,122,115], rojo = [179,38,30], linea = [217,223,214];
+  const cat = h.catalogo || S.catalogo, v = h.valores || {};
+
+  function cabecera(primera){
+    pdf.setFont("helvetica","bold"); pdf.setTextColor(...tinta);
+    if (primera) {
+      pdf.setFontSize(20); pdf.text("Recuento · La Pava", M, M + 6);
+      pdf.setFont("helvetica","normal"); pdf.setFontSize(12); pdf.setTextColor(...gris);
+      const f = fechaLarga(h.fecha); pdf.text(f.charAt(0).toUpperCase() + f.slice(1), M, M + 13);
+      const total = todosProductos(cat).length, n = todosProductos(cat).filter(p => v[p.id] !== undefined).length;
+      pdf.setFontSize(9); pdf.text(`${n} de ${total} productos contados  ·  En rojo: productos a 0`, M, M + 18.5);
+      pdf.setDrawColor(...verde); pdf.setLineWidth(0.6); pdf.line(M, M + 22, W - M, M + 22);
+      return M + 29;
+    }
+    pdf.setFontSize(10); pdf.setFont("helvetica","normal"); pdf.setTextColor(...gris);
+    pdf.text(`Recuento · La Pava · ${fechaCorta(h.fecha)} (continuación)`, M, M + 3);
+    return M + 10;
+  }
+
+  const LIM = H - M - 4;
+  let top = cabecera(true), col = 0, yy = top;
+  function siguienteColumna(){
+    if (col === 0) { col = 1; yy = top; }
+    else { pdf.addPage(); top = cabecera(false); col = 0; yy = top; }
+  }
+  function cabeceraCat(c, cont){
+    const x = M + col * (COLW + GAP);
+    pdf.setFillColor(...verde); pdf.rect(x, yy, COLW, HEAD - 1, "F");
+    pdf.setTextColor(255,255,255); pdf.setFont("helvetica","bold"); pdf.setFontSize(11);
+    pdf.text(c.nombre + (cont ? " (sigue)" : ""), x + 2.5, yy + 5);
+    pdf.setFont("helvetica","normal"); pdf.setFontSize(8.5);
+    pdf.text(c.unidad, x + COLW - 2.5, yy + 5, { align: "right" });
+    yy += HEAD + 4.4;
+  }
+  function cierre(){
+    const x = M + col * (COLW + GAP);
+    pdf.setDrawColor(...linea); pdf.setLineWidth(0.2); pdf.line(x, yy - 4.4, x + COLW, yy - 4.4);
+  }
+  const bloques = cat.categorias.filter(c => c.productos.length);
+  for (const c of bloques) {
+    const alto = HEAD + 4.4 + c.productos.length * ROW;
+    // si no cabe aquí pero sí en una columna nueva, saltar; si no cabe en ninguna, se parte
+    if (yy + alto > LIM && top + alto <= LIM) siguienteColumna();
+    else if (yy + HEAD + 4.4 + 2 * ROW > LIM) siguienteColumna();
+    cabeceraCat(c, false);
+    c.productos.forEach((p, i) => {
+      if (yy + 1.8 > LIM) { cierre(); siguienteColumna(); cabeceraCat(c, true); }
+      const x = M + col * (COLW + GAP);
+      if (i % 2 === 1) { pdf.setFillColor(244,247,242); pdf.rect(x, yy - 4.4, COLW, ROW, "F"); }
+      const val = v[p.id];
+      pdf.setFont("helvetica","normal"); pdf.setFontSize(10.5); pdf.setTextColor(...tinta);
+      pdf.text(pdf.splitTextToSize(p.nombre, COLW - 22)[0], x + 2.5, yy);
+      pdf.setFont("helvetica","bold"); pdf.setFontSize(11);
+      if (val === undefined) { pdf.setTextColor(...gris); pdf.text("—", x + COLW - 2.5, yy, { align: "right" }); }
+      else { pdf.setTextColor(...(val === 0 ? rojo : tinta)); pdf.text(num(val), x + COLW - 2.5, yy, { align: "right" }); }
+      yy += ROW;
+    });
+    cierre();
+    yy += 4;
+  }
+  if (h.notas && h.notas.trim()) {
+    pdf.setFontSize(10.5);
+    const lineas = pdf.splitTextToSize(h.notas.trim(), COLW);
+    if (yy + 8 + lineas.length * 5 > LIM) siguienteColumna();
+    const x = M + col * (COLW + GAP);
+    pdf.setFont("helvetica","bold"); pdf.setFontSize(12); pdf.setTextColor(...verde); pdf.text("Notas", x, yy + 4);
+    pdf.setFont("helvetica","normal"); pdf.setFontSize(10.5); pdf.setTextColor(...tinta); pdf.text(lineas, x, yy + 10);
+  }
+  const n = pdf.getNumberOfPages();
+  for (let i = 1; i <= n; i++) { pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(...gris); pdf.text(`Página ${i} de ${n}`, W - M, H - 7, { align: "right" }); }
+  return pdf;
+}
+function descargarPDF(h){
+  if (!window.jspdf) { toast("No se pudo cargar el generador de PDF."); return; }
+  const [y,m,d] = h.fecha.split("-");
+  return compartirPDF(crearPDF(h), `recuento${d}${m}${y}.pdf`);
+}
+function descargarPDFCaja(c){
+  if (!window.jspdf) { toast("No se pudo cargar el generador de PDF."); return; }
+  const [y,m,d] = c.fecha.split("-");
+  return compartirPDF(crearPDFCaja(c), `caja${d}${m}${y}.pdf`);
+}
+async function compartirPDF(pdf, filename){
+  const blob = pdf.output("blob");
+  const file = new File([blob], filename, { type: "application/pdf" });
+  // En iPhone/Android instalada, el menú de compartir permite "Guardar en Archivos" o WhatsApp
+  const esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (esMovil && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: filename }); return; }
+    catch (e) { if (e && e.name === "AbortError") return; }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  toast(`${filename} guardado en Descargas`);
+}
+
+/* ---------- calculadora: caja del día ---------- */
+function euros(v){
+  v = Math.round((v || 0) * 100) / 100; if (Math.abs(v) < 0.005) v = 0;
+  return v.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+}
+function eur2(v){ return v === null || v === undefined ? "" : v.toFixed(2).replace(".", ","); }
+function minutos(e, s){
+  if (!e || !s) return null;
+  const [eh, em] = e.split(":").map(Number), [sh, sm] = s.split(":").map(Number);
+  let d = (sh*60 + sm) - (eh*60 + em); if (d <= 0) d += 1440; // salida después de medianoche
+  return d;
+}
+function horasTxt(min){ return min === null ? "" : num(Math.round(min/60*100)/100) + " h"; }
+function lunesISO(iso){
+  const [y,m,d] = iso.split("-").map(Number), f = new Date(y, m-1, d);
+  f.setDate(f.getDate() - (f.getDay() + 6) % 7);
+  return f.getFullYear()+"-"+pad(f.getMonth()+1)+"-"+pad(f.getDate());
+}
+function diaCorto(iso){ const [y,m,d] = iso.split("-").map(Number); return new Date(y, m-1, d).toLocaleDateString("es-ES", { weekday: "short", day: "numeric" }); }
+const suma = a => a.reduce((s, x) => s + (x || 0), 0);
+
+function calcCaja(c){
+  const ent = (c.final ?? 0) - (c.inicial ?? 0) + (c.datafono ?? 0);
+  const gastos = suma(c.gastos.map(g => g.importe)), pers = suma(c.personal.map(p => p.pago));
+  return { ent, gastos, pers, sal: gastos + pers, neto: ent - gastos - pers };
+}
+function tieneNumeros(c){
+  return [c.inicial, c.final, c.datafono].some(v => v !== null && v !== undefined)
+    || c.gastos.some(g => g.importe !== null && g.importe !== undefined)
+    || c.personal.some(p => p.pago !== null && p.pago !== undefined);
+}
+function cajaVacia(c){ return !tieneNumeros(c) && c.personal.every(p => !p.nombre.trim() && !p.entrada && !p.salida); }
+// Total del finde: suma de netos desde el lunes de esa semana hasta ese día
+function finde(c){
+  const lunes = lunesISO(c.fecha);
+  const dias = S.cajas.filter(x => x.fecha >= lunes && x.fecha < c.fecha && tieneNumeros(x)).map(x => ({ fecha: x.fecha, neto: calcCaja(x).neto }));
+  if (tieneNumeros(c)) dias.push({ fecha: c.fecha, neto: calcCaja(c).neto });
+  dias.sort((a,b) => a.fecha.localeCompare(b.fecha));
+  return { total: suma(dias.map(d => d.neto)), dias };
+}
+function findeTxt(f){ return f.dias.length > 1 ? f.dias.map(d => `${diaCorto(d.fecha)}: ${euros(d.neto)}`).join(" + ") : "Solo este día esta semana"; }
+function nombres(c){ return [...new Set(c.personal.map(p => p.nombre.trim()).filter(Boolean))]; }
+function aDevolver(c){
+  const m = {};
+  c.gastos.forEach(g => { if (g.quien && g.importe) m[g.quien] = (m[g.quien] || 0) + g.importe; });
+  return Object.entries(m);
+}
+
+function cargarCaja(f){
+  S.borrar = null;
+  const h = S.cajas.find(x => x.fecha === f);
+  if (h) { S.caja = JSON.parse(JSON.stringify(h)); return; }
+  const prev = S.cajas.find(x => x.fecha < f); // S.cajas va de más nueva a más vieja
+  const personal = prev && prev.personal.some(p => p.nombre.trim())
+    ? prev.personal.filter(p => p.nombre.trim()).map(p => ({ id: uid(), nombre: p.nombre, entrada: "", salida: "", pago: null }))
+    : [{ id: uid(), nombre: "", entrada: "", salida: "", pago: null }];
+  S.caja = { fecha: f, inicial: null, final: null, datafono: null,
+    gastos: [{ id: uid(), concepto: "Compras", importe: null, quien: "" }, { id: uid(), concepto: "Hielos", importe: null, quien: "" }],
+    personal };
+}
+function guardarCaja(){
+  const c = S.caja, i = S.cajas.findIndex(x => x.fecha === c.fecha);
+  if (cajaVacia(c)) {
+    if (i >= 0) S.cajas.splice(i, 1);
+    local.del("caja:"+c.fecha); S.saveState = "ok"; setStatus(); return;
+  }
+  const doc = JSON.parse(JSON.stringify(c)); doc.actualizado = new Date().toISOString();
+  if (i >= 0) S.cajas[i] = doc; else { S.cajas.push(doc); S.cajas.sort((a,b) => b.fecha.localeCompare(a.fecha)); }
+  S.saveState = local.set("caja:"+c.fecha, doc) ? "ok" : "error";
+  while (S.cajas.length > MAX_HIST) { const viejo = S.cajas.pop(); local.del("caja:"+viejo.fecha); }
+  setStatus();
+}
+
+function moneyInput(attrs, v, label){
+  return `<div class="money"><input ${attrs} inputmode="decimal" autocomplete="off" placeholder="0,00" value="${eur2(v)}" aria-label="${esc(label)}"><span>€</span></div>`;
+}
+function opcionesQuien(c, actual){
+  const ns = nombres(c); if (actual && !ns.includes(actual)) ns.push(actual);
+  return `<option value="">la caja</option>` + ns.map(n => `<option value="${esc(n)}" ${n === actual ? "selected" : ""}>${esc(n)}</option>`).join("");
+}
+function delBtn(tipo, id, lleno){
+  return S.borrar === tipo+":"+id
+    ? `<button class="confirm" data-act="${tipo}delok" type="button">¿Borrar?</button>`
+    : `<button class="ib del" data-act="${tipo}del" type="button" aria-label="Borrar fila"${lleno ? "" : ' data-vacio="1"'}>✕</button>`;
+}
+
+function renderCaja(){
+  const c = S.caja, t = calcCaja(c), f = finde(c);
+  $("#topExtra").innerHTML = `
+    <div class="bar">
+      <div class="date"><label for="cfecha">Fecha</label><input type="date" id="cfecha" value="${c.fecha}"></div>
+      <div class="kpi"><span>Neto del día</span><b id="kNeto" class="${t.neto < 0 ? "neg" : ""}">${euros(t.neto)}</b></div>
+    </div>`;
+  $("#cfecha").addEventListener("change", e => { if (e.target.value) { cargarCaja(e.target.value); renderCaja(); window.scrollTo(0,0); } });
+
+  let html = `<section class="sec"><h2>Entradas</h2><div class="list">
+    <div class="crow"><label for="c-inicial">Caja inicial</label>${moneyInput('id="c-inicial" data-c="inicial"', c.inicial, "Caja inicial")}</div>
+    <div class="crow"><label for="c-final">Caja final</label>${moneyInput('id="c-final" data-c="final"', c.final, "Caja final")}</div>
+    <div class="crow"><label for="c-datafono">Datáfono</label>${moneyInput('id="c-datafono" data-c="datafono"', c.datafono, "Datáfono")}</div>
+    <div class="ctot"><span>Total<small>Caja final − caja inicial + datáfono</small></span><b id="tEnt">${euros(t.ent)}</b></div>
+  </div></section>`;
+
+  html += `<section class="sec"><h2>Salidas</h2><div class="list">`;
+  for (const g of c.gastos) {
+    html += `<div class="gi" data-g="${g.id}">
+      <div class="gl"><input class="txt" data-gf="concepto" value="${esc(g.concepto)}" placeholder="Concepto (ej.: Cena)" autocomplete="off" aria-label="Concepto">
+        ${moneyInput('data-gf="importe"', g.importe, "Importe de " + (g.concepto || "gasto"))}
+        ${delBtn("g", g.id, g.concepto || g.importe !== null)}</div>
+      <div class="gl2"><label>Lo pagó</label><select data-gf="quien" aria-label="Quién lo pagó">${opcionesQuien(c, g.quien)}</select></div>
+    </div>`;
+  }
+  html += `<button class="addrow" data-act="gadd" type="button">+ Añadir gasto</button>
+    <div class="crow auto"><span>Personal<small id="tPersDet">${persDet(c)}</small></span><b id="tPers">${euros(t.pers)}</b></div>
+    <div class="ctot"><span>Total salida</span><b id="tSal">${euros(t.sal)}</b></div>
+  </div><p class="devolver" id="devolver" ${aDevolver(c).length ? "" : "hidden"}>${devolverTxt(c)}</p></section>`;
+
+  html += `<section class="sec"><h2>Horas <small>el pago de cada uno suma en Personal</small></h2><div class="list">`;
+  for (const p of c.personal) {
+    html += `<div class="gi" data-p="${p.id}">
+      <div class="gl"><input class="txt" data-pf="nombre" value="${esc(p.nombre)}" placeholder="Nombre" autocomplete="off" aria-label="Nombre">
+        ${moneyInput('data-pf="pago"', p.pago, "Pago de " + (p.nombre || "persona"))}
+        ${delBtn("p", p.id, p.nombre || p.pago !== null || p.entrada || p.salida)}</div>
+      <div class="gl2"><input type="time" data-pf="entrada" value="${esc(p.entrada)}" aria-label="Hora de entrada"> a
+        <input type="time" data-pf="salida" value="${esc(p.salida)}" aria-label="Hora de salida">
+        <span class="hrs" id="h-${p.id}">${horasTxt(minutos(p.entrada, p.salida))}</span></div>
+    </div>`;
+  }
+  html += `<button class="addrow" data-act="padd" type="button">+ Añadir persona</button></div></section>`;
+
+  html += `<div class="res">
+    <div class="r"><span>Neto<small>Total − total salida</small></span><b id="rNeto" class="${t.neto < 0 ? "neg" : ""}">${euros(t.neto)}</b></div>
+    <div class="r"><span>Total finde<small id="rFindeDet">${esc(findeTxt(f))}</small></span><b id="rFinde" class="${f.total < 0 ? "neg" : ""}">${euros(f.total)}</b></div>
+  </div>`;
+  $("#main").innerHTML = html;
+}
+function persDet(c){ const ps = c.personal.filter(p => p.pago); return ps.length ? ps.map(p => (p.nombre.trim() || "?") + " " + num(p.pago)).join(" + ") : "Se rellena con los pagos de Horas"; }
+function devolverTxt(c){ return "A devolver: " + aDevolver(c).map(([n, v]) => `<b>${esc(n)}</b> ${euros(v)}`).join(" · "); }
+
+function actualizarCaja(){
+  const c = S.caja, t = calcCaja(c), f = finde(c);
+  const set = (id, txt, neg) => { const el = document.getElementById(id); if (el) { el.textContent = txt; if (neg !== undefined) el.classList.toggle("neg", neg); } };
+  set("kNeto", euros(t.neto), t.neto < 0); set("rNeto", euros(t.neto), t.neto < 0);
+  set("tEnt", euros(t.ent)); set("tPers", euros(t.pers)); set("tSal", euros(t.sal)); set("tPersDet", persDet(c));
+  set("rFinde", euros(f.total), f.total < 0); set("rFindeDet", findeTxt(f));
+  const d = $("#devolver"); if (d) { d.hidden = !aDevolver(c).length; d.innerHTML = devolverTxt(c); }
+}
+function actualizarQuien(){
+  document.querySelectorAll('[data-gf="quien"]').forEach(sel => {
+    const g = S.caja.gastos.find(x => x.id === sel.closest("[data-g]").dataset.g);
+    sel.innerHTML = opcionesQuien(S.caja, g.quien);
+  });
+}
+function filaCaja(el){
+  const gEl = el.closest("[data-g]"), pEl = el.closest("[data-p]");
+  if (gEl) return { arr: S.caja.gastos, id: gEl.dataset.g, campo: el.dataset.gf };
+  if (pEl) return { arr: S.caja.personal, id: pEl.dataset.p, campo: el.dataset.pf };
+  return null;
+}
+const CAMPOS_DINERO = ["importe", "pago"];
+function esDinero(el){ return el.dataset.c !== undefined || CAMPOS_DINERO.includes(el.dataset.gf) || CAMPOS_DINERO.includes(el.dataset.pf); }
+function escribirCaja(el, final){
+  if (el.dataset.c) {
+    const v = parseNum(el.value);
+    if (Number.isNaN(v)) { if (final) { toast("Escribe un importe, por ejemplo 394,50"); el.value = eur2(S.caja[el.dataset.c]); } return; }
+    S.caja[el.dataset.c] = v; if (final) el.value = eur2(v);
+  } else {
+    const f = filaCaja(el); if (!f) return;
+    const obj = f.arr.find(x => x.id === f.id); if (!obj) return;
+    if (CAMPOS_DINERO.includes(f.campo)) {
+      const v = parseNum(el.value);
+      if (Number.isNaN(v)) { if (final) { toast("Escribe un importe, por ejemplo 10,78"); el.value = eur2(obj[f.campo]); } return; }
+      obj[f.campo] = v; if (final) el.value = eur2(v);
+    } else {
+      obj[f.campo] = el.value;
+      if (f.campo === "entrada" || f.campo === "salida") { const h = document.getElementById("h-"+obj.id); if (h) h.textContent = horasTxt(minutos(obj.entrada, obj.salida)); }
+      if (f.campo === "nombre" && final) actualizarQuien();
+    }
+  }
+  actualizarCaja(); guardarCaja();
+}
+$("#main").addEventListener("input", e => { if (S.view === "caja" && e.target.matches("input")) escribirCaja(e.target, false); });
+$("#main").addEventListener("change", e => { if (S.view === "caja") escribirCaja(e.target, true); });
+$("#main").addEventListener("focusin", e => { if (S.view === "caja" && e.target.matches(".money input")) e.target.select(); });
+$("#main").addEventListener("keydown", e => { if (S.view === "caja" && e.key === "Enter" && e.target.matches("input")) e.target.blur(); });
+
+function accionCaja(a, el){
+  const c = S.caja;
+  const quitar = (arr, id) => { const i = arr.findIndex(x => x.id === id); if (i >= 0) arr.splice(i, 1); };
+  switch (a) {
+    case "gadd": case "padd": {
+      const nuevo = a === "gadd" ? { id: uid(), concepto: "", importe: null, quien: "" } : { id: uid(), nombre: "", entrada: "", salida: "", pago: null };
+      (a === "gadd" ? c.gastos : c.personal).push(nuevo); S.borrar = null; renderCaja();
+      const inp = document.querySelector(`[data-${a[0]}="${nuevo.id}"] .txt`); if (inp) { inp.focus(); inp.scrollIntoView({ block: "center" }); }
+      return;
+    }
+    case "gdel": case "pdel": {
+      const id = el.closest(a === "gdel" ? "[data-g]" : "[data-p]").dataset[a[0]];
+      if (el.dataset.vacio) { quitar(a === "gdel" ? c.gastos : c.personal, id); S.borrar = null; guardarCaja(); }
+      else S.borrar = a[0] + ":" + id;
+      renderCaja(); return;
+    }
+    case "gdelok": case "pdelok": {
+      const id = el.closest(a === "gdelok" ? "[data-g]" : "[data-p]").dataset[a[0]];
+      quitar(a === "gdelok" ? c.gastos : c.personal, id);
+      if (a === "pdelok") actualizarQuien();
+      S.borrar = null; guardarCaja(); renderCaja(); toast("Fila borrada"); return;
+    }
+  }
+}
+
+/* ---------- PDF de la caja ---------- */
+function crearPDFCaja(c){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: "mm", format: "a4" });
+  const W = 210, H = 297, M = 14, CW = W - 2*M;
+  const verde = [30,106,76], tinta = [24,34,29], gris = [110,122,115], rojo = [179,38,30], suave = [220,235,226];
+  const t = calcCaja(c), f = finde(c);
+  let y;
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(20); pdf.setTextColor(...tinta); pdf.text("Caja · La Pava", M, M + 6);
+  pdf.setFont("helvetica","normal"); pdf.setFontSize(12); pdf.setTextColor(...gris);
+  const fl = fechaLarga(c.fecha); pdf.text(fl.charAt(0).toUpperCase() + fl.slice(1), M, M + 13);
+  pdf.setDrawColor(...verde); pdf.setLineWidth(0.6); pdf.line(M, M + 18, W - M, M + 18);
+  y = M + 26;
+  let par = 0;
+  function sitio(h){ if (y + h > H - M) { pdf.addPage(); y = M + 6; } }
+  function seccion(tit){
+    sitio(24); par = 0;
+    pdf.setFillColor(...verde); pdf.rect(M, y, CW, 7.5, "F");
+    pdf.setTextColor(255,255,255); pdf.setFont("helvetica","bold"); pdf.setFontSize(11.5); pdf.text(tit, M + 3, y + 5.2);
+    y += 7.5 + 5;
+  }
+  function fila(label, valor, sub, vacio){
+    sitio(8);
+    if (par++ % 2 === 1) { pdf.setFillColor(244,247,242); pdf.rect(M, y - 4.6, CW, 7, "F"); }
+    pdf.setFont("helvetica","normal"); pdf.setFontSize(11); pdf.setTextColor(...tinta); pdf.text(label, M + 3, y);
+    if (sub) { const w = pdf.getTextWidth(label); pdf.setFontSize(9); pdf.setTextColor(...gris); pdf.text(pdf.splitTextToSize(sub, CW - w - 45)[0], M + 3 + w + 3, y); }
+    pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.setTextColor(...(vacio ? gris : tinta)); pdf.text(valor, W - M - 3, y, { align: "right" });
+    y += 7;
+  }
+  function total(label, valor, grande, neg){
+    const h = grande ? 10 : 8;
+    sitio(h + 6);
+    pdf.setFillColor(...suave); pdf.rect(M, y - 4.6, CW, h, "F");
+    pdf.setDrawColor(...verde); pdf.setLineWidth(0.4); pdf.line(M, y - 4.6, W - M, y - 4.6);
+    const base = y + (grande ? 1.4 : 0.6);
+    pdf.setFont("helvetica","bold"); pdf.setFontSize(grande ? 14 : 12); pdf.setTextColor(...tinta); pdf.text(label, M + 3, base);
+    pdf.setTextColor(...(neg ? rojo : tinta)); pdf.text(valor, W - M - 3, base, { align: "right" });
+    y += h + 6;
+  }
+  const dinero = v => v === null || v === undefined ? "—" : euros(v);
+  seccion("Entradas");
+  fila("Caja inicial", dinero(c.inicial), "", c.inicial === null);
+  fila("Caja final", dinero(c.final), "", c.final === null);
+  fila("Datáfono", dinero(c.datafono), "", c.datafono === null);
+  total("Total", euros(t.ent));
+  seccion("Salidas");
+  c.gastos.filter(g => g.concepto.trim() || g.importe !== null).forEach(g => fila(g.concepto.trim() || "Gasto", dinero(g.importe), g.quien ? "(lo pagó " + g.quien + ")" : "", g.importe === null));
+  const ps = c.personal.filter(p => p.pago);
+  fila("Personal", euros(t.pers), ps.length ? "(" + ps.map(p => num(p.pago)).join(" + ") + ")" : "");
+  total("Total salida", euros(t.sal));
+  const dev = aDevolver(c);
+  if (dev.length) { pdf.setFont("helvetica","normal"); pdf.setFontSize(9.5); pdf.setTextColor(...gris); pdf.text("A devolver: " + dev.map(([n, v]) => n + " " + euros(v)).join("  ·  "), M + 3, y - 2); y += 5; }
+  const gente = c.personal.filter(p => p.nombre.trim() || p.pago !== null || p.entrada || p.salida);
+  if (gente.length) {
+    seccion("Horas");
+    gente.forEach(p => {
+      const m = minutos(p.entrada, p.salida);
+      fila(p.nombre.trim() || "?", dinero(p.pago), (p.entrada || "?") + " a " + (p.salida || "?") + (m !== null ? "  (" + horasTxt(m) + ")" : ""), p.pago === null);
+    });
+    y += 4;
+  }
+  y += 2;
+  total("Neto", euros(t.neto), true, t.neto < 0);
+  y -= 2;
+  total("Total finde", euros(f.total), true, f.total < 0);
+  if (f.dias.length > 1) { pdf.setFont("helvetica","normal"); pdf.setFontSize(9.5); pdf.setTextColor(...gris); pdf.text(findeTxt(f), M + 3, y - 2); }
+  return pdf;
+}
+
+/* ---------- arranque ---------- */
+const CATALOGO_INICIAL = {"categorias":[{"id":"whisky","nombre":"Whisky","unidad":"botellas","productos":[{"id":"red-label","nombre":"Red Label"},{"id":"cutty-shark","nombre":"Cutty Shark"},{"id":"jb","nombre":"JB"},{"id":"white-label","nombre":"White Label"},{"id":"jameson","nombre":"Jameson"},{"id":"ballantine","nombre":"Ballantine"},{"id":"dyc-8","nombre":"DYC 8"},{"id":"jack-daniels","nombre":"Jack Daniels"},{"id":"jim-bean","nombre":"Jim Bean"},{"id":"cardhu","nombre":"Cardhu"},{"id":"black-label","nombre":"Black Label"},{"id":"gold-label","nombre":"Gold Label"},{"id":"macallan","nombre":"Macallan"},{"id":"chivas","nombre":"Chivas"},{"id":"southern","nombre":"Southern"},{"id":"ballantine-s-10","nombre":"Ballantine's 10"},{"id":"ballantines-0","nombre":"Ballantines 0"}]},{"id":"ron","nombre":"Ron","unidad":"botellas","productos":[{"id":"barcelo","nombre":"Barceló"},{"id":"brugal","nombre":"Brugal"},{"id":"brugal-doble-reserva","nombre":"Brugal Doble Reserva"},{"id":"brugal-1888","nombre":"Brugal 1888"},{"id":"cacique","nombre":"Cacique"},{"id":"cacique-500","nombre":"Cacique 500"},{"id":"legendario","nombre":"Legendario"},{"id":"matusalem","nombre":"Matusalem"},{"id":"zacapa","nombre":"Zacapa"},{"id":"havana-7","nombre":"Havana 7"},{"id":"bacardi","nombre":"Bacardi"},{"id":"malibu","nombre":"Malibu"},{"id":"havana-club-anejo","nombre":"Havana club añejo"}]},{"id":"ginebra","nombre":"Ginebra","unidad":"botellas","productos":[{"id":"larios","nombre":"Larios"},{"id":"larios-rose","nombre":"Larios Rosé"},{"id":"larios-12","nombre":"Larios 12"},{"id":"tanqueray","nombre":"Tanqueray"},{"id":"tanqueray-ten","nombre":"Tanqueray Ten"},{"id":"seagrams","nombre":"Seagrams"},{"id":"seagrams-s-a","nombre":"Seagrams S/A"},{"id":"beefeater","nombre":"Beefeater"},{"id":"beefeater-pink","nombre":"Beefeater Pink"},{"id":"beefeater-black","nombre":"Beefeater Black"},{"id":"beefeater-s-a","nombre":"Beefeater S/A"},{"id":"bombay","nombre":"Bombay"},{"id":"puerto-de-indias","nombre":"Puerto de Indias"},{"id":"puerto-de-indias-rosa","nombre":"Puerto de Indias Rosa"},{"id":"brockman","nombre":"Brockman"},{"id":"hendricks","nombre":"Hendricks"},{"id":"mombasa","nombre":"Mombasa"},{"id":"mombasa-fresa","nombre":"Mombasa Fresa"},{"id":"nordes","nombre":"Nordés"},{"id":"martin-millers","nombre":"Martin Millers"},{"id":"ginabelle","nombre":"Ginabelle"}]},{"id":"vodka","nombre":"Vodka","unidad":"botellas","productos":[{"id":"absolut","nombre":"Absolut"},{"id":"belvedere","nombre":"Belvedere"},{"id":"roberto-cavalli","nombre":"Roberto Cavalli"}]},{"id":"licores","nombre":"Licores","unidad":"botellas","productos":[{"id":"baileys","nombre":"Baileys"},{"id":"fernet","nombre":"Fernet"},{"id":"vermouth","nombre":"Vermouth"},{"id":"pacharan","nombre":"Pacharán"},{"id":"apperol","nombre":"Apperol"},{"id":"licor-43","nombre":"Licor 43"},{"id":"martini","nombre":"Martini"},{"id":"caparrini","nombre":"Caparrini"},{"id":"baines-oro","nombre":"Baines Oro"}]},{"id":"chupitos","nombre":"Chupitos","unidad":"botellas","productos":[{"id":"jagger","nombre":"Jagger"},{"id":"tequila","nombre":"Tequila"},{"id":"tequila-fresa","nombre":"Tequila Fresa"},{"id":"thunder","nombre":"Thunder"}]},{"id":"vinos","nombre":"Vinos","unidad":"botellas","productos":[{"id":"tinto","nombre":"Tinto"},{"id":"blanco","nombre":"Blanco"}]},{"id":"cocacola","nombre":"Coca-Cola","unidad":"cajas","productos":[{"id":"coca-cola","nombre":"Coca-Cola"},{"id":"coca-cola-cero","nombre":"Coca-Cola Cero"},{"id":"coca-cola-cero-cero","nombre":"Coca-Cola Cero-Cero"},{"id":"fanta-limon","nombre":"Fanta Limón"},{"id":"fanta-naranja","nombre":"Fanta Naranja"},{"id":"bliss-berry","nombre":"Bliss Berry"},{"id":"zumo-naranja","nombre":"Zumo Naranja"},{"id":"zumo-pina","nombre":"Zumo Piña"},{"id":"zumo-melocoton","nombre":"Zumo Melocotón"},{"id":"limon-nada","nombre":"Limon&Nada"},{"id":"agua","nombre":"Agua"},{"id":"pepsi","nombre":"Pepsi"},{"id":"aquarius","nombre":"Aquarius"},{"id":"nestea","nombre":"Nestea"},{"id":"nestea-maracuya","nombre":"Nestea Maracuyá"}]},{"id":"schweppes","nombre":"Schweppes","unidad":"cajas","productos":[{"id":"tonica","nombre":"Tónica"},{"id":"tonica-cero","nombre":"Tónica Cero"},{"id":"tonica-fresa","nombre":"Tónica Fresa"},{"id":"tonica-limon","nombre":"Tónica Limón"},{"id":"tonica-naranja","nombre":"Tónica Naranja"},{"id":"tonica-pomelo","nombre":"Tónica Pomelo"},{"id":"7up","nombre":"7up"}]},{"id":"victoria","nombre":"Victoria","unidad":"cajas","productos":[{"id":"tercios","nombre":"Tercios"},{"id":"tercios-s-a","nombre":"Tercios S/A"},{"id":"tercios-s-g","nombre":"Tercios S/G"},{"id":"barril","nombre":"Barril"}]},{"id":"energeticas","nombre":"Energéticas y agua","unidad":"cajas","productos":[{"id":"redbull","nombre":"RedBull"},{"id":"redbull-cero","nombre":"Redbull Cero"},{"id":"monster-mango","nombre":"Monster mango"},{"id":"monster","nombre":"Monster"},{"id":"agua-con-gas","nombre":"Agua con Gas"}]},{"id":"devolucion","nombre":"Devolución","unidad":"cajas","productos":[{"id":"dev-coca-cola","nombre":"Coca-Cola"},{"id":"dev-7up","nombre":"7up"},{"id":"dev-schweppes","nombre":"Schweppes"},{"id":"dev-pepsi","nombre":"Pepsi"},{"id":"dev-victoria","nombre":"Victoria"},{"id":"dev-agua-con-gas","nombre":"Agua con Gas"},{"id":"dev-barril","nombre":"Barril"}]}]};
+function iniciar(){
+  S.catalogo = local.get("catalogo") || JSON.parse(JSON.stringify(CATALOGO_INICIAL));
+  if (!local.get("catalogo")) local.set("catalogo", S.catalogo);
+  const hs = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("pava:rec:")) { try { hs.push(JSON.parse(localStorage.getItem(k))); } catch {} }
+    }
+  } catch {}
+  S.historial = hs.filter(h => h && h.fecha).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  const cs = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("pava:caja:")) { try { cs.push(JSON.parse(localStorage.getItem(k))); } catch {} }
+    }
+  } catch {}
+  S.cajas = cs.filter(c => c && c.fecha && Array.isArray(c.gastos) && Array.isArray(c.personal)).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  cargarFecha(S.fecha);
+  cargarCaja(hoyISO());
+  S.ready = true;
+  render();
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}
+}
+iniciar();
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+})();
+</script>
+</body>
+</html>
