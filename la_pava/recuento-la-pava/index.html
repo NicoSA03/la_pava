@@ -61,8 +61,9 @@ button{cursor:pointer}
 .brand h1 span{color:var(--accent)}
 .status{font-size:13px;color:var(--muted);white-space:nowrap}
 .status.warn{color:var(--amber)}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
-.tabs button{border:0;background:none;padding:8px 4px;border-radius:7px;font-weight:600;font-size:15px;color:var(--muted)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.tabs button{border:0;background:none;padding:8px 2px;border-radius:7px;font-weight:600;font-size:15px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:380px){.tabs button{font-size:14px}}
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 
 /* Barra de recuento */
@@ -150,6 +151,39 @@ button{cursor:pointer}
 .hrow .d small{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
 .hrow .acts{display:flex;gap:6px}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:9px;font-size:14px;z-index:50;max-width:calc(100% - 32px)}
+/* Calculadora (caja del día) */
+.kpi{flex:1 1 140px;display:grid;gap:2px;text-align:right}
+.kpi span{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.kpi b{font-family:var(--display);font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.neg{color:var(--danger)!important}
+.crow{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 14px;border-top:1px solid var(--line)}
+.crow:first-child{border-top:0}
+.crow>label,.crow>span{flex:1;min-width:0;font-weight:500}
+.crow small,.ctot small,.res small{display:block;font-family:var(--body);font-size:12px;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.crow.auto b{font-family:var(--display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;padding-right:4px}
+.money{position:relative;flex:none;width:118px}
+.money input{width:100%;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-family:var(--display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right;padding:0 26px 0 8px}
+.money input::placeholder{color:var(--muted);opacity:.7}
+.money span{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+.ctot{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:2px solid var(--accent);background:var(--accent-soft)}
+.ctot span{flex:1;font-family:var(--display);font-weight:600;font-size:21px}
+.ctot b{font-family:var(--display);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.gi{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:8px 10px 8px 14px;border-top:1px solid var(--line)}
+.gi:first-child{border-top:0}
+.gl{display:flex;gap:8px;align-items:center;min-width:0}
+.gl .txt{flex:1 1 0;width:0;min-width:0;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);padding:0 10px;font-weight:500}
+.gl2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.gl2 select,.gl2 input{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px 8px;min-height:36px;font-variant-numeric:tabular-nums}
+.gl2 input[type="time"]{width:116px;min-width:0}
+.hrs{margin-left:auto;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;padding-right:4px}
+.addrow{display:block;width:100%;border:0;border-top:1px solid var(--line);background:none;padding:12px 14px;text-align:left;color:var(--accent);font-weight:600}
+.devolver{font-size:14px;color:var(--muted);margin:8px 2px 0}
+.devolver b{color:var(--ink);font-weight:600}
+.res{margin-top:22px;background:var(--surface);border:2px solid var(--accent);border-radius:12px;overflow:hidden}
+.res .r{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.res .r+.r{border-top:1px solid var(--line)}
+.res .r span{flex:1;min-width:0;font-family:var(--display);font-weight:600;font-size:22px}
+.res .r b{font-family:var(--display);font-weight:700;font-size:30px;font-variant-numeric:tabular-nums;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 
@@ -163,6 +197,7 @@ button{cursor:pointer}
     </div>
     <nav class="tabs" role="tablist">
       <button role="tab" data-view="contar" aria-selected="true">Contar</button>
+      <button role="tab" data-view="caja" aria-selected="false">Calculadora</button>
       <button role="tab" data-view="productos" aria-selected="false">Productos</button>
       <button role="tab" data-view="historial" aria-selected="false">Historial</button>
     </nav>
@@ -219,6 +254,8 @@ const S = {
   fecha: hoyISO(),
   rec: { valores: {}, notas: "" },
   historial: [],          // [{fecha, valores, notas, catalogo}]
+  caja: null,             // caja del día que se está editando
+  cajas: [],              // cajas guardadas, de más nueva a más vieja
   view: "contar",
   soloPend: false,
   aviso: false,           // aviso antes del PDF
@@ -264,10 +301,12 @@ function cargarFecha(f){
 /* ---------- render ---------- */
 function render(){
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === S.view)));
-  $("#dock").hidden = !(S.view === "contar" && S.ready);
+  $("#dock").hidden = !((S.view === "contar" || S.view === "caja") && S.ready);
+  $("#btnPend").hidden = S.view !== "contar";
   setStatus();
   if (!S.ready) { $("#topExtra").innerHTML = ""; $("#main").innerHTML = '<p class="empty">Cargando productos…</p>'; return; }
   if (S.view === "contar") renderContar();
+  else if (S.view === "caja") renderCaja();
   else if (S.view === "productos") renderProductos();
   else renderHistorial();
 }
@@ -382,13 +421,19 @@ function renderProductos(){
 
 function renderHistorial(){
   $("#topExtra").innerHTML = "";
-  if (!S.historial.length) { $("#main").innerHTML = `<p class="empty">Todavía no hay recuentos guardados.</p>`; return; }
-  $("#main").innerHTML = `<div class="hist">${S.historial.map(h => {
+  if (!S.historial.length && !S.cajas.length) { $("#main").innerHTML = `<p class="empty">Todavía no hay recuentos ni cajas guardados.</p>`; return; }
+  let html = "";
+  if (S.historial.length) html += `<section class="sec"><h2>Recuentos</h2><div class="hist">${S.historial.map(h => {
     const prods = todosProductos(h.catalogo || S.catalogo);
     const n = prods.filter(p => h.valores && h.valores[p.id] !== undefined).length;
     return `<div class="hrow"><div class="d"><b>${fechaLarga(h.fecha)}</b><small>${n} de ${prods.length} contados${h.fecha === hoyISO() ? " · hoy" : ""}</small></div>
       <div class="acts"><button class="btn small" data-open="${h.fecha}" type="button">Abrir</button><button class="btn small primary" data-pdf="${h.fecha}" type="button">PDF</button></div></div>`;
-  }).join("")}</div>`;
+  }).join("")}</div></section>`;
+  if (S.cajas.length) html += `<section class="sec"><h2>Caja</h2><div class="hist">${S.cajas.map(c => {
+    return `<div class="hrow"><div class="d"><b>${fechaLarga(c.fecha)}</b><small>Neto ${euros(calcCaja(c).neto)}${c.fecha === hoyISO() ? " · hoy" : ""}</small></div>
+      <div class="acts"><button class="btn small" data-copen="${c.fecha}" type="button">Abrir</button><button class="btn small primary" data-cpdf="${c.fecha}" type="button">PDF</button></div></div>`;
+  }).join("")}</div></section>`;
+  $("#main").innerHTML = html;
 }
 
 /* ---------- eventos: contar ---------- */
@@ -407,7 +452,11 @@ $("#main").addEventListener("click", e => {
   const op = e.target.closest("[data-open]");
   if (op) { cargarFecha(op.dataset.open); S.view = "contar"; S.soloPend = false; render(); window.scrollTo(0,0); return; }
   const pd = e.target.closest("[data-pdf]");
-  if (pd) { const h = S.historial.find(x => x.fecha === pd.dataset.pdf); if (h) descargarPDF(h); }
+  if (pd) { const h = S.historial.find(x => x.fecha === pd.dataset.pdf); if (h) descargarPDF(h); return; }
+  const co = e.target.closest("[data-copen]");
+  if (co) { cargarCaja(co.dataset.copen); S.view = "caja"; render(); window.scrollTo(0,0); return; }
+  const cp = e.target.closest("[data-cpdf]");
+  if (cp) { const c = S.cajas.find(x => x.fecha === cp.dataset.cpdf); if (c) descargarPDFCaja(c); }
 });
 $("#main").addEventListener("change", e => {
   const t = e.target;
@@ -436,6 +485,7 @@ function prodDe(el){ const c = catDe(el), id = el.closest("[data-id]").dataset.i
 function mover(arr, i, d){ const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; }
 
 function accion(a, el){
+  if (S.view === "caja") return accionCaja(a, el);
   const cats = S.catalogo.categorias;
   switch (a) {
     case "up": case "down": { const {c,i} = prodDe(el); mover(c.productos, i, a==="up"?-1:1); S.borrar = null; guardarCatalogo(); renderProductos(); break; }
@@ -472,7 +522,7 @@ $("#main").addEventListener("submit", e => {
 });
 // cancelar confirmación de borrado al tocar fuera
 document.addEventListener("click", e => {
-  if (S.borrar && S.view === "productos" && !e.target.closest("[data-act]")) { S.borrar = null; renderProductos(); }
+  if (S.borrar && (S.view === "productos" || S.view === "caja") && !e.target.closest("[data-act]")) { S.borrar = null; if (S.view === "caja") renderCaja(); else renderProductos(); }
 }, true);
 
 /* ---------- pestañas y dock ---------- */
@@ -482,6 +532,7 @@ document.querySelector(".tabs").addEventListener("click", e => {
 });
 $("#btnPend").addEventListener("click", () => { S.soloPend = !S.soloPend; S.aviso = false; render(); window.scrollTo(0,0); });
 $("#btnPdf").addEventListener("click", () => {
+  if (S.view === "caja") { descargarPDFCaja(S.caja); return; }
   const faltan = todosProductos().length - contados();
   if (faltan > 0) { S.aviso = true; render(); window.scrollTo(0,0); return; }
   descargarPDF(docActual());
@@ -565,11 +616,18 @@ function crearPDF(h){
   for (let i = 1; i <= n; i++) { pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(...gris); pdf.text(`Página ${i} de ${n}`, W - M, H - 7, { align: "right" }); }
   return pdf;
 }
-async function descargarPDF(h){
+function descargarPDF(h){
   if (!window.jspdf) { toast("No se pudo cargar el generador de PDF."); return; }
   const [y,m,d] = h.fecha.split("-");
-  const filename = `recuento${d}${m}${y}.pdf`;
-  const blob = crearPDF(h).output("blob");
+  return compartirPDF(crearPDF(h), `recuento${d}${m}${y}.pdf`);
+}
+function descargarPDFCaja(c){
+  if (!window.jspdf) { toast("No se pudo cargar el generador de PDF."); return; }
+  const [y,m,d] = c.fecha.split("-");
+  return compartirPDF(crearPDFCaja(c), `caja${d}${m}${y}.pdf`);
+}
+async function compartirPDF(pdf, filename){
+  const blob = pdf.output("blob");
   const file = new File([blob], filename, { type: "application/pdf" });
   // En iPhone/Android instalada, el menú de compartir permite "Guardar en Archivos" o WhatsApp
   const esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -582,6 +640,285 @@ async function descargarPDF(h){
   a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
   toast(`${filename} guardado en Descargas`);
+}
+
+/* ---------- calculadora: caja del día ---------- */
+function euros(v){
+  v = Math.round((v || 0) * 100) / 100; if (Math.abs(v) < 0.005) v = 0;
+  return v.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+}
+function eur2(v){ return v === null || v === undefined ? "" : v.toFixed(2).replace(".", ","); }
+function minutos(e, s){
+  if (!e || !s) return null;
+  const [eh, em] = e.split(":").map(Number), [sh, sm] = s.split(":").map(Number);
+  let d = (sh*60 + sm) - (eh*60 + em); if (d <= 0) d += 1440; // salida después de medianoche
+  return d;
+}
+function horasTxt(min){ return min === null ? "" : num(Math.round(min/60*100)/100) + " h"; }
+function lunesISO(iso){
+  const [y,m,d] = iso.split("-").map(Number), f = new Date(y, m-1, d);
+  f.setDate(f.getDate() - (f.getDay() + 6) % 7);
+  return f.getFullYear()+"-"+pad(f.getMonth()+1)+"-"+pad(f.getDate());
+}
+function diaCorto(iso){ const [y,m,d] = iso.split("-").map(Number); return new Date(y, m-1, d).toLocaleDateString("es-ES", { weekday: "short", day: "numeric" }); }
+const suma = a => a.reduce((s, x) => s + (x || 0), 0);
+
+function calcCaja(c){
+  const ent = (c.final ?? 0) - (c.inicial ?? 0) + (c.datafono ?? 0);
+  const gastos = suma(c.gastos.map(g => g.importe)), pers = suma(c.personal.map(p => p.pago));
+  return { ent, gastos, pers, sal: gastos + pers, neto: ent - gastos - pers };
+}
+function tieneNumeros(c){
+  return [c.inicial, c.final, c.datafono].some(v => v !== null && v !== undefined)
+    || c.gastos.some(g => g.importe !== null && g.importe !== undefined)
+    || c.personal.some(p => p.pago !== null && p.pago !== undefined);
+}
+function cajaVacia(c){ return !tieneNumeros(c) && c.personal.every(p => !p.nombre.trim() && !p.entrada && !p.salida); }
+// Total del finde: suma de netos desde el lunes de esa semana hasta ese día
+function finde(c){
+  const lunes = lunesISO(c.fecha);
+  const dias = S.cajas.filter(x => x.fecha >= lunes && x.fecha < c.fecha && tieneNumeros(x)).map(x => ({ fecha: x.fecha, neto: calcCaja(x).neto }));
+  if (tieneNumeros(c)) dias.push({ fecha: c.fecha, neto: calcCaja(c).neto });
+  dias.sort((a,b) => a.fecha.localeCompare(b.fecha));
+  return { total: suma(dias.map(d => d.neto)), dias };
+}
+function findeTxt(f){ return f.dias.length > 1 ? f.dias.map(d => `${diaCorto(d.fecha)}: ${euros(d.neto)}`).join(" + ") : "Solo este día esta semana"; }
+function nombres(c){ return [...new Set(c.personal.map(p => p.nombre.trim()).filter(Boolean))]; }
+function aDevolver(c){
+  const m = {};
+  c.gastos.forEach(g => { if (g.quien && g.importe) m[g.quien] = (m[g.quien] || 0) + g.importe; });
+  return Object.entries(m);
+}
+
+function cargarCaja(f){
+  S.borrar = null;
+  const h = S.cajas.find(x => x.fecha === f);
+  if (h) { S.caja = JSON.parse(JSON.stringify(h)); return; }
+  const prev = S.cajas.find(x => x.fecha < f); // S.cajas va de más nueva a más vieja
+  const personal = prev && prev.personal.some(p => p.nombre.trim())
+    ? prev.personal.filter(p => p.nombre.trim()).map(p => ({ id: uid(), nombre: p.nombre, entrada: "", salida: "", pago: null }))
+    : [{ id: uid(), nombre: "", entrada: "", salida: "", pago: null }];
+  S.caja = { fecha: f, inicial: null, final: null, datafono: null,
+    gastos: [{ id: uid(), concepto: "Compras", importe: null, quien: "" }, { id: uid(), concepto: "Hielos", importe: null, quien: "" }],
+    personal };
+}
+function guardarCaja(){
+  const c = S.caja, i = S.cajas.findIndex(x => x.fecha === c.fecha);
+  if (cajaVacia(c)) {
+    if (i >= 0) S.cajas.splice(i, 1);
+    local.del("caja:"+c.fecha); S.saveState = "ok"; setStatus(); return;
+  }
+  const doc = JSON.parse(JSON.stringify(c)); doc.actualizado = new Date().toISOString();
+  if (i >= 0) S.cajas[i] = doc; else { S.cajas.push(doc); S.cajas.sort((a,b) => b.fecha.localeCompare(a.fecha)); }
+  S.saveState = local.set("caja:"+c.fecha, doc) ? "ok" : "error";
+  while (S.cajas.length > MAX_HIST) { const viejo = S.cajas.pop(); local.del("caja:"+viejo.fecha); }
+  setStatus();
+}
+
+function moneyInput(attrs, v, label){
+  return `<div class="money"><input ${attrs} inputmode="decimal" autocomplete="off" placeholder="0,00" value="${eur2(v)}" aria-label="${esc(label)}"><span>€</span></div>`;
+}
+function opcionesQuien(c, actual){
+  const ns = nombres(c); if (actual && !ns.includes(actual)) ns.push(actual);
+  return `<option value="">la caja</option>` + ns.map(n => `<option value="${esc(n)}" ${n === actual ? "selected" : ""}>${esc(n)}</option>`).join("");
+}
+function delBtn(tipo, id, lleno){
+  return S.borrar === tipo+":"+id
+    ? `<button class="confirm" data-act="${tipo}delok" type="button">¿Borrar?</button>`
+    : `<button class="ib del" data-act="${tipo}del" type="button" aria-label="Borrar fila"${lleno ? "" : ' data-vacio="1"'}>✕</button>`;
+}
+
+function renderCaja(){
+  const c = S.caja, t = calcCaja(c), f = finde(c);
+  $("#topExtra").innerHTML = `
+    <div class="bar">
+      <div class="date"><label for="cfecha">Fecha</label><input type="date" id="cfecha" value="${c.fecha}"></div>
+      <div class="kpi"><span>Neto del día</span><b id="kNeto" class="${t.neto < 0 ? "neg" : ""}">${euros(t.neto)}</b></div>
+    </div>`;
+  $("#cfecha").addEventListener("change", e => { if (e.target.value) { cargarCaja(e.target.value); renderCaja(); window.scrollTo(0,0); } });
+
+  let html = `<section class="sec"><h2>Entradas</h2><div class="list">
+    <div class="crow"><label for="c-inicial">Caja inicial</label>${moneyInput('id="c-inicial" data-c="inicial"', c.inicial, "Caja inicial")}</div>
+    <div class="crow"><label for="c-final">Caja final</label>${moneyInput('id="c-final" data-c="final"', c.final, "Caja final")}</div>
+    <div class="crow"><label for="c-datafono">Datáfono</label>${moneyInput('id="c-datafono" data-c="datafono"', c.datafono, "Datáfono")}</div>
+    <div class="ctot"><span>Total<small>Caja final − caja inicial + datáfono</small></span><b id="tEnt">${euros(t.ent)}</b></div>
+  </div></section>`;
+
+  html += `<section class="sec"><h2>Salidas</h2><div class="list">`;
+  for (const g of c.gastos) {
+    html += `<div class="gi" data-g="${g.id}">
+      <div class="gl"><input class="txt" data-gf="concepto" value="${esc(g.concepto)}" placeholder="Concepto (ej.: Cena)" autocomplete="off" aria-label="Concepto">
+        ${moneyInput('data-gf="importe"', g.importe, "Importe de " + (g.concepto || "gasto"))}
+        ${delBtn("g", g.id, g.concepto || g.importe !== null)}</div>
+      <div class="gl2"><label>Lo pagó</label><select data-gf="quien" aria-label="Quién lo pagó">${opcionesQuien(c, g.quien)}</select></div>
+    </div>`;
+  }
+  html += `<button class="addrow" data-act="gadd" type="button">+ Añadir gasto</button>
+    <div class="crow auto"><span>Personal<small id="tPersDet">${persDet(c)}</small></span><b id="tPers">${euros(t.pers)}</b></div>
+    <div class="ctot"><span>Total salida</span><b id="tSal">${euros(t.sal)}</b></div>
+  </div><p class="devolver" id="devolver" ${aDevolver(c).length ? "" : "hidden"}>${devolverTxt(c)}</p></section>`;
+
+  html += `<section class="sec"><h2>Horas <small>el pago de cada uno suma en Personal</small></h2><div class="list">`;
+  for (const p of c.personal) {
+    html += `<div class="gi" data-p="${p.id}">
+      <div class="gl"><input class="txt" data-pf="nombre" value="${esc(p.nombre)}" placeholder="Nombre" autocomplete="off" aria-label="Nombre">
+        ${moneyInput('data-pf="pago"', p.pago, "Pago de " + (p.nombre || "persona"))}
+        ${delBtn("p", p.id, p.nombre || p.pago !== null || p.entrada || p.salida)}</div>
+      <div class="gl2"><input type="time" data-pf="entrada" value="${esc(p.entrada)}" aria-label="Hora de entrada"> a
+        <input type="time" data-pf="salida" value="${esc(p.salida)}" aria-label="Hora de salida">
+        <span class="hrs" id="h-${p.id}">${horasTxt(minutos(p.entrada, p.salida))}</span></div>
+    </div>`;
+  }
+  html += `<button class="addrow" data-act="padd" type="button">+ Añadir persona</button></div></section>`;
+
+  html += `<div class="res">
+    <div class="r"><span>Neto<small>Total − total salida</small></span><b id="rNeto" class="${t.neto < 0 ? "neg" : ""}">${euros(t.neto)}</b></div>
+    <div class="r"><span>Total finde<small id="rFindeDet">${esc(findeTxt(f))}</small></span><b id="rFinde" class="${f.total < 0 ? "neg" : ""}">${euros(f.total)}</b></div>
+  </div>`;
+  $("#main").innerHTML = html;
+}
+function persDet(c){ const ps = c.personal.filter(p => p.pago); return ps.length ? ps.map(p => (p.nombre.trim() || "?") + " " + num(p.pago)).join(" + ") : "Se rellena con los pagos de Horas"; }
+function devolverTxt(c){ return "A devolver: " + aDevolver(c).map(([n, v]) => `<b>${esc(n)}</b> ${euros(v)}`).join(" · "); }
+
+function actualizarCaja(){
+  const c = S.caja, t = calcCaja(c), f = finde(c);
+  const set = (id, txt, neg) => { const el = document.getElementById(id); if (el) { el.textContent = txt; if (neg !== undefined) el.classList.toggle("neg", neg); } };
+  set("kNeto", euros(t.neto), t.neto < 0); set("rNeto", euros(t.neto), t.neto < 0);
+  set("tEnt", euros(t.ent)); set("tPers", euros(t.pers)); set("tSal", euros(t.sal)); set("tPersDet", persDet(c));
+  set("rFinde", euros(f.total), f.total < 0); set("rFindeDet", findeTxt(f));
+  const d = $("#devolver"); if (d) { d.hidden = !aDevolver(c).length; d.innerHTML = devolverTxt(c); }
+}
+function actualizarQuien(){
+  document.querySelectorAll('[data-gf="quien"]').forEach(sel => {
+    const g = S.caja.gastos.find(x => x.id === sel.closest("[data-g]").dataset.g);
+    sel.innerHTML = opcionesQuien(S.caja, g.quien);
+  });
+}
+function filaCaja(el){
+  const gEl = el.closest("[data-g]"), pEl = el.closest("[data-p]");
+  if (gEl) return { arr: S.caja.gastos, id: gEl.dataset.g, campo: el.dataset.gf };
+  if (pEl) return { arr: S.caja.personal, id: pEl.dataset.p, campo: el.dataset.pf };
+  return null;
+}
+const CAMPOS_DINERO = ["importe", "pago"];
+function esDinero(el){ return el.dataset.c !== undefined || CAMPOS_DINERO.includes(el.dataset.gf) || CAMPOS_DINERO.includes(el.dataset.pf); }
+function escribirCaja(el, final){
+  if (el.dataset.c) {
+    const v = parseNum(el.value);
+    if (Number.isNaN(v)) { if (final) { toast("Escribe un importe, por ejemplo 394,50"); el.value = eur2(S.caja[el.dataset.c]); } return; }
+    S.caja[el.dataset.c] = v; if (final) el.value = eur2(v);
+  } else {
+    const f = filaCaja(el); if (!f) return;
+    const obj = f.arr.find(x => x.id === f.id); if (!obj) return;
+    if (CAMPOS_DINERO.includes(f.campo)) {
+      const v = parseNum(el.value);
+      if (Number.isNaN(v)) { if (final) { toast("Escribe un importe, por ejemplo 10,78"); el.value = eur2(obj[f.campo]); } return; }
+      obj[f.campo] = v; if (final) el.value = eur2(v);
+    } else {
+      obj[f.campo] = el.value;
+      if (f.campo === "entrada" || f.campo === "salida") { const h = document.getElementById("h-"+obj.id); if (h) h.textContent = horasTxt(minutos(obj.entrada, obj.salida)); }
+      if (f.campo === "nombre" && final) actualizarQuien();
+    }
+  }
+  actualizarCaja(); guardarCaja();
+}
+$("#main").addEventListener("input", e => { if (S.view === "caja" && e.target.matches("input")) escribirCaja(e.target, false); });
+$("#main").addEventListener("change", e => { if (S.view === "caja") escribirCaja(e.target, true); });
+$("#main").addEventListener("focusin", e => { if (S.view === "caja" && e.target.matches(".money input")) e.target.select(); });
+$("#main").addEventListener("keydown", e => { if (S.view === "caja" && e.key === "Enter" && e.target.matches("input")) e.target.blur(); });
+
+function accionCaja(a, el){
+  const c = S.caja;
+  const quitar = (arr, id) => { const i = arr.findIndex(x => x.id === id); if (i >= 0) arr.splice(i, 1); };
+  switch (a) {
+    case "gadd": case "padd": {
+      const nuevo = a === "gadd" ? { id: uid(), concepto: "", importe: null, quien: "" } : { id: uid(), nombre: "", entrada: "", salida: "", pago: null };
+      (a === "gadd" ? c.gastos : c.personal).push(nuevo); S.borrar = null; renderCaja();
+      const inp = document.querySelector(`[data-${a[0]}="${nuevo.id}"] .txt`); if (inp) { inp.focus(); inp.scrollIntoView({ block: "center" }); }
+      return;
+    }
+    case "gdel": case "pdel": {
+      const id = el.closest(a === "gdel" ? "[data-g]" : "[data-p]").dataset[a[0]];
+      if (el.dataset.vacio) { quitar(a === "gdel" ? c.gastos : c.personal, id); S.borrar = null; guardarCaja(); }
+      else S.borrar = a[0] + ":" + id;
+      renderCaja(); return;
+    }
+    case "gdelok": case "pdelok": {
+      const id = el.closest(a === "gdelok" ? "[data-g]" : "[data-p]").dataset[a[0]];
+      quitar(a === "gdelok" ? c.gastos : c.personal, id);
+      if (a === "pdelok") actualizarQuien();
+      S.borrar = null; guardarCaja(); renderCaja(); toast("Fila borrada"); return;
+    }
+  }
+}
+
+/* ---------- PDF de la caja ---------- */
+function crearPDFCaja(c){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: "mm", format: "a4" });
+  const W = 210, H = 297, M = 14, CW = W - 2*M;
+  const verde = [30,106,76], tinta = [24,34,29], gris = [110,122,115], rojo = [179,38,30], suave = [220,235,226];
+  const t = calcCaja(c), f = finde(c);
+  let y;
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(20); pdf.setTextColor(...tinta); pdf.text("Caja · La Pava", M, M + 6);
+  pdf.setFont("helvetica","normal"); pdf.setFontSize(12); pdf.setTextColor(...gris);
+  const fl = fechaLarga(c.fecha); pdf.text(fl.charAt(0).toUpperCase() + fl.slice(1), M, M + 13);
+  pdf.setDrawColor(...verde); pdf.setLineWidth(0.6); pdf.line(M, M + 18, W - M, M + 18);
+  y = M + 26;
+  let par = 0;
+  function sitio(h){ if (y + h > H - M) { pdf.addPage(); y = M + 6; } }
+  function seccion(tit){
+    sitio(24); par = 0;
+    pdf.setFillColor(...verde); pdf.rect(M, y, CW, 7.5, "F");
+    pdf.setTextColor(255,255,255); pdf.setFont("helvetica","bold"); pdf.setFontSize(11.5); pdf.text(tit, M + 3, y + 5.2);
+    y += 7.5 + 5;
+  }
+  function fila(label, valor, sub, vacio){
+    sitio(8);
+    if (par++ % 2 === 1) { pdf.setFillColor(244,247,242); pdf.rect(M, y - 4.6, CW, 7, "F"); }
+    pdf.setFont("helvetica","normal"); pdf.setFontSize(11); pdf.setTextColor(...tinta); pdf.text(label, M + 3, y);
+    if (sub) { const w = pdf.getTextWidth(label); pdf.setFontSize(9); pdf.setTextColor(...gris); pdf.text(pdf.splitTextToSize(sub, CW - w - 45)[0], M + 3 + w + 3, y); }
+    pdf.setFont("helvetica","bold"); pdf.setFontSize(11); pdf.setTextColor(...(vacio ? gris : tinta)); pdf.text(valor, W - M - 3, y, { align: "right" });
+    y += 7;
+  }
+  function total(label, valor, grande, neg){
+    const h = grande ? 10 : 8;
+    sitio(h + 6);
+    pdf.setFillColor(...suave); pdf.rect(M, y - 4.6, CW, h, "F");
+    pdf.setDrawColor(...verde); pdf.setLineWidth(0.4); pdf.line(M, y - 4.6, W - M, y - 4.6);
+    const base = y + (grande ? 1.4 : 0.6);
+    pdf.setFont("helvetica","bold"); pdf.setFontSize(grande ? 14 : 12); pdf.setTextColor(...tinta); pdf.text(label, M + 3, base);
+    pdf.setTextColor(...(neg ? rojo : tinta)); pdf.text(valor, W - M - 3, base, { align: "right" });
+    y += h + 6;
+  }
+  const dinero = v => v === null || v === undefined ? "—" : euros(v);
+  seccion("Entradas");
+  fila("Caja inicial", dinero(c.inicial), "", c.inicial === null);
+  fila("Caja final", dinero(c.final), "", c.final === null);
+  fila("Datáfono", dinero(c.datafono), "", c.datafono === null);
+  total("Total", euros(t.ent));
+  seccion("Salidas");
+  c.gastos.filter(g => g.concepto.trim() || g.importe !== null).forEach(g => fila(g.concepto.trim() || "Gasto", dinero(g.importe), g.quien ? "(lo pagó " + g.quien + ")" : "", g.importe === null));
+  const ps = c.personal.filter(p => p.pago);
+  fila("Personal", euros(t.pers), ps.length ? "(" + ps.map(p => num(p.pago)).join(" + ") + ")" : "");
+  total("Total salida", euros(t.sal));
+  const dev = aDevolver(c);
+  if (dev.length) { pdf.setFont("helvetica","normal"); pdf.setFontSize(9.5); pdf.setTextColor(...gris); pdf.text("A devolver: " + dev.map(([n, v]) => n + " " + euros(v)).join("  ·  "), M + 3, y - 2); y += 5; }
+  const gente = c.personal.filter(p => p.nombre.trim() || p.pago !== null || p.entrada || p.salida);
+  if (gente.length) {
+    seccion("Horas");
+    gente.forEach(p => {
+      const m = minutos(p.entrada, p.salida);
+      fila(p.nombre.trim() || "?", dinero(p.pago), (p.entrada || "?") + " a " + (p.salida || "?") + (m !== null ? "  (" + horasTxt(m) + ")" : ""), p.pago === null);
+    });
+    y += 4;
+  }
+  y += 2;
+  total("Neto", euros(t.neto), true, t.neto < 0);
+  y -= 2;
+  total("Total finde", euros(f.total), true, f.total < 0);
+  if (f.dias.length > 1) { pdf.setFont("helvetica","normal"); pdf.setFontSize(9.5); pdf.setTextColor(...gris); pdf.text(findeTxt(f), M + 3, y - 2); }
+  return pdf;
 }
 
 /* ---------- arranque ---------- */
@@ -597,7 +934,16 @@ function iniciar(){
     }
   } catch {}
   S.historial = hs.filter(h => h && h.fecha).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  const cs = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("pava:caja:")) { try { cs.push(JSON.parse(localStorage.getItem(k))); } catch {} }
+    }
+  } catch {}
+  S.cajas = cs.filter(c => c && c.fecha && Array.isArray(c.gastos) && Array.isArray(c.personal)).sort((a,b) => b.fecha.localeCompare(a.fecha));
   cargarFecha(S.fecha);
+  cargarCaja(hoyISO());
   S.ready = true;
   render();
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}

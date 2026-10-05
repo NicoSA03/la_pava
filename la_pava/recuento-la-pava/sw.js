@@ -1,5 +1,5 @@
 // Permite usar la app sin conexión. Si cambias algún archivo, sube el número de versión.
-const CACHE = "recuento-la-pava-v1";
+const CACHE = "recuento-la-pava-v2";
 const ARCHIVOS = [
   "./", "./index.html", "./manifest.webmanifest", "./vendor/jspdf.umd.min.js",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png",
